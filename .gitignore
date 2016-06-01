@@ -22,4 +22,7 @@ train-shrinking
 # datasets
 data
 
+# ctags and cscope
+tags
+cscope.out
 

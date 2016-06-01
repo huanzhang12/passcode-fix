@@ -2671,6 +2671,32 @@ void train_one(const problem *prob, const parameter *param, double *w, double Cp
 		case L2R_L2LOSS_SVR_DUAL:
 			solve_l2r_l1l2_svr(prob, w, param, L2R_L2LOSS_SVR_DUAL);
 			break;
+		case L2R_L2LOSS_SVC_DUAL_RF_FIX:
+		{
+			double *C = new double[prob->l];
+			for(int i = 0; i < prob->l; i++) {
+				if(prob->y[i] > 0) C[i] = Cp;
+				else C[i] = Cn;
+			}
+			fun_obj=new l2r_l2_svc_fun(prob, C, prob_t);
+			solve_l2r_l1l2_svc_rf_fix(prob, w, eps, Cp, Cn, L2R_L2LOSS_SVC_DUAL_RF, fun_obj, param->max_iters);
+			delete fun_obj;
+			delete[] C;
+			break;
+		}
+		case L2R_L1LOSS_SVC_DUAL_RF_FIX:
+		{
+			double *C = new double[prob->l];
+			for(int i = 0; i < prob->l; i++) {
+				if(prob->y[i] > 0) C[i] = Cp;
+				else C[i] = Cn;
+			}
+			fun_obj=new l2r_l1_svc_fun(prob, C, prob_t);
+			solve_l2r_l1l2_svc_rf_fix(prob, w, eps, Cp, Cn, L2R_L1LOSS_SVC_DUAL_RF, fun_obj, param->max_iters);
+			delete fun_obj;
+			delete[] C;
+			break;
+		}
 		case L2R_L2LOSS_SVC_DUAL_RF:
 		{
 			double *C = new double[prob->l];
@@ -2719,6 +2745,32 @@ void train_one(const problem *prob, const parameter *param, double *w, double Cp
 			}
 			fun_obj=new l2r_l1_svc_fun(prob, C, prob_t);
 			solve_l2r_l1l2_svc_lock(prob, w, eps, Cp, Cn, L2R_L1LOSS_SVC_DUAL_LOCK, fun_obj, param->max_iters);
+			delete fun_obj;
+			delete[] C;
+			break;
+		}
+		case L2R_L2LOSS_SVC_DUAL_ATOMIC_FIX:
+		{
+			double *C = new double[prob->l];
+			for(int i = 0; i < prob->l; i++) {
+				if(prob->y[i] > 0) C[i] = Cp;
+				else C[i] = Cn;
+			}
+			fun_obj=new l2r_l2_svc_fun(prob, C, prob_t);
+			solve_l2r_l1l2_svc_atomic_fix(prob, w, eps, Cp, Cn, L2R_L2LOSS_SVC_DUAL_ATOMIC, fun_obj, param->max_iters);
+			delete fun_obj;
+			delete[] C;
+			break;
+		}
+		case L2R_L1LOSS_SVC_DUAL_ATOMIC_FIX:
+		{
+			double *C = new double[prob->l];
+			for(int i = 0; i < prob->l; i++) {
+				if(prob->y[i] > 0) C[i] = Cp;
+				else C[i] = Cn;
+			}
+			fun_obj=new l2r_l1_svc_fun(prob, C, prob_t);
+			solve_l2r_l1l2_svc_atomic_fix(prob, w, eps, Cp, Cn, L2R_L1LOSS_SVC_DUAL_ATOMIC, fun_obj, param->max_iters);
 			delete fun_obj;
 			delete[] C;
 			break;
@@ -3338,10 +3390,14 @@ const char *check_parameter(const problem *prob, const parameter *param)
 		&& param->solver_type != L2R_L1LOSS_SVC_DUAL_MP
 		&& param->solver_type != L2R_L2LOSS_SVC_DUAL_RF
 		&& param->solver_type != L2R_L1LOSS_SVC_DUAL_RF
+		&& param->solver_type != L2R_L2LOSS_SVC_DUAL_RF_FIX
+		&& param->solver_type != L2R_L1LOSS_SVC_DUAL_RF_FIX
 		&& param->solver_type != L2R_L2LOSS_SVC_DUAL_LOCK
 		&& param->solver_type != L2R_L1LOSS_SVC_DUAL_LOCK
 		&& param->solver_type != L2R_L2LOSS_SVC_DUAL_ATOMIC
 		&& param->solver_type != L2R_L1LOSS_SVC_DUAL_ATOMIC
+		&& param->solver_type != L2R_L2LOSS_SVC_DUAL_ATOMIC_FIX
+		&& param->solver_type != L2R_L1LOSS_SVC_DUAL_ATOMIC_FIX
 		&& param->solver_type != L2R_L2LOSS_SVC_DUAL_COCOA
 		&& param->solver_type != L2R_L1LOSS_SVC_DUAL_COCOA
 		&& param->solver_type != L2R_L2LOSS_SVC_DUAL_ASCD
