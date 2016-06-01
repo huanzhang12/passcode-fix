@@ -818,6 +818,11 @@ static void solve_l2r_l1l2_svc_atomic_fix(
 		seeds[th] = th;
 
 	double totaltime = 0, starttime = 0;
+	// NEW variables to fix divergence
+	double* alpha_old = new double[l];
+	double* delta_alpha = new double[l];
+	double* w_old = new double[w_size];
+	double* delta_w = new double[w_size];
 	while (iter < max_iter)
 	{
 		starttime = omp_get_wtime();
@@ -863,6 +868,9 @@ static void solve_l2r_l1l2_svc_atomic_fix(
 			}
 		}
 
+		// Before we start updates, save the old alpha and w
+		memcpy(w_old, w, w_size * sizeof(double));
+		memcpy(alpha_old, alpha, l * sizeof(double));
 
 #pragma omp parallel for schedule(dynamic,8)
 		for (size_t s=0; s<active_size; s++)
@@ -994,6 +1002,34 @@ static void solve_l2r_l1l2_svc_atomic_fix(
 				PGmin_old = -INF;
 		}
 #endif
+	
+		// Now find delta_w and delta_alpha
+		double delta_w2 = 0.0;
+		double dot_w_delta_w = 0.0;
+		for (int ggg = 0; ggg < w_size; ggg++) {
+			double wi_old = w_old[ggg];
+			double wi = w[ggg];
+			double delta_wi = wi - wi_old;
+			delta_w[ggg] = delta_wi;
+			dot_w_delta_w += wi_old * delta_wi;
+			delta_w2 += delta_wi * delta_wi;
+		}
+		double sum_delta_alpha = 0.0;
+		for (int ggg = 0; ggg < l; ggg++) {
+			double delta_alphai = alpha[ggg] - alpha_old[ggg];
+			sum_delta_alpha += delta_alphai;
+			delta_alpha[ggg] = delta_alphai;
+		}
+		double eta = (sum_delta_alpha - dot_w_delta_w) / delta_w2;
+		double bounded_eta = min(1.0, max(0.0, eta));
+		for (int ggg = 0; ggg < l; ggg++) {
+			alpha[ggg] = alpha_old[ggg] + bounded_eta * delta_alpha[ggg];
+		}
+		// We also want to update w, because it is used in calculations later
+		for (int ggg = 0; ggg < w_size; ggg++) {
+			w[ggg] = w_old[ggg] + bounded_eta * delta_w[ggg];
+		}
+
 		double itertime = omp_get_wtime() - starttime;
 		totaltime += itertime;
 		//tesing after each step
@@ -1031,8 +1067,9 @@ static void solve_l2r_l1l2_svc_atomic_fix(
 			true_acc = fun_obj->testing(&(tmpw[0]))*100;
 		}
 
-		printf("iter %d walltime %lf itertime %lf f %.3lf d %.3lf acc %.1lf true-f %.3lf true-d %.3lf true-acc %.1lf err %.3g inittime %lf active_size %ld\n", 
-				iter, totaltime, itertime, primal_obj, dual_obj, acc, true_primal_obj, true_dual_obj, true_acc, err, inittime, active_set.size());		
+		double change = 0.5 * bounded_eta * bounded_eta * delta_w2 + bounded_eta * (dot_w_delta_w - sum_delta_alpha);
+		printf("iter %d walltime %lf itertime %lf f %.3lf d %.3lf acc %.1lf true-f %.3lf true-d %.3lf true-acc %.1lf err %.3g inittime %lf active_size %ld eta %lf true-eta %lf delta_w^2 %lf sum_d_alpha %lf dot_w_d_w %lf change %lf\n", 
+				iter, totaltime, itertime, primal_obj, dual_obj, acc, true_primal_obj, true_dual_obj, true_acc, err, inittime, active_set.size(), eta, bounded_eta, delta_w2, sum_delta_alpha, dot_w_delta_w, change);		
 
 		fflush(stdout);
 	}
@@ -1427,8 +1464,8 @@ static void solve_l2r_l1l2_svc_rf_fix(
 	const problem *prob, double *w, double eps,
 	double Cp, double Cn, int solver_type, function *fun_obj = NULL, int max_iter = 1000)
 { // {{{
-	int l = prob->l;
-	int w_size = prob->n;
+	int l = prob->l; // nr. of instances
+	int w_size = prob->n; // nr. of features
 	//int i, s, iter = 0;
 	//double C, d, G;
 	int iter = 0;
@@ -1464,24 +1501,26 @@ static void solve_l2r_l1l2_svc_rf_fix(
 	double tmp_start = omp_get_wtime();
 
 	// default solver_type: L2R_L2LOSS_SVC_DUAL_RF
+	// only the first and third number will be used here
 	double diag[3] = {0.5/Cn, 0, 0.5/Cp};
 	double upper_bound[3] = {INF, 0, INF};
 	if(solver_type == L2R_L1LOSS_SVC_DUAL_RF)
 	{
+		// the range for alpha is [0, C]
 		diag[0] = 0;
 		diag[2] = 0;
-		upper_bound[0] = Cn;
+		upper_bound[0] = Cn; // in our experiment both Cn=Cp=C
 		upper_bound[2] = Cp;
 	}
 
 #pragma omp parallel for
 	for(int i=0; i<l; i++)
 	{
-		if(prob->y[i] > 0)
+		if(prob->y[i] > 0) // we are doing classification, y is +1 -1
 			y[i] = +1;
 		else
 			y[i] = -1;
-		active_set[i] = i;
+		active_set[i] = i; // for permutation
 		// Initial alpha can be set here. Note that
 		// 0 <= alpha[i] <= upper_bound[GETI(i)]
 		alpha[i] = 0;
@@ -1493,6 +1532,7 @@ static void solve_l2r_l1l2_svc_rf_fix(
 #pragma omp parallel for
 	for(int i=0; i<l; i++)
 	{
+		// compute the diagonal elements of Q, which is xi^2 for L1-SVM
 		QD[i] = diag[GETI(i)];
 
 		feature_node *xi = prob->x[i];
@@ -1510,6 +1550,7 @@ static void solve_l2r_l1l2_svc_rf_fix(
 		}
 		index[i] = i;
 	}
+	// permutation
 	for (size_t i=0; i<l; i++) {
 		size_t j = i+rand()%(l-i);
 		std::swap(active_set[i], active_set[j]);
@@ -1520,6 +1561,13 @@ static void solve_l2r_l1l2_svc_rf_fix(
 		seeds[th] = th;
 
 	double totaltime = 0, starttime = 0;
+
+	// NEW variables to fix divergence
+	double* alpha_old = new double[l];
+	double* delta_alpha = new double[l];
+	double* w_old = new double[w_size];
+	double* delta_w = new double[w_size];
+	// iterations started!
 	while (iter < max_iter)
 	{
 		starttime = omp_get_wtime();
@@ -1554,6 +1602,9 @@ static void solve_l2r_l1l2_svc_rf_fix(
 		} else {
 #pragma omp parallel
 			{
+				// Before everything starts, regenerate the random permutation on each worker
+				// each worker will only work on the instances assigned to it at the beginning,
+				// but in a different order
 				int tid = omp_get_thread_num();
 				size_t len = (active_size/nr_threads)+(active_size%nr_threads?1:0);
 				size_t start = tid*len, end = std::min((tid+1)*len, active_size);
@@ -1564,7 +1615,10 @@ static void solve_l2r_l1l2_svc_rf_fix(
 				}
 			}
 		}
-
+		
+		// Before we start updates, save the old alpha and w
+		memcpy(w_old, w, w_size * sizeof(double));
+		memcpy(alpha_old, alpha, l * sizeof(double));
 
 #pragma omp parallel for schedule(dynamic,8)
 		for (size_t s=0; s<active_size; s++)
@@ -1572,7 +1626,7 @@ static void solve_l2r_l1l2_svc_rf_fix(
 			int i = active_set[s];
 			double G = 0;
 			schar yi = y[i];
-
+			// compute G = (Q * alpha)_i - 1 = yi*xi^T*w - 1
 			feature_node *xi = prob->x[i];
 			while(xi->index!= -1)
 			{
@@ -1582,6 +1636,7 @@ static void solve_l2r_l1l2_svc_rf_fix(
 			G = G*yi-1;
 
 			double C = upper_bound[GETI(i)];
+			// for L1-SVM diag[] is 0.0
 			G += alpha[i]*diag[GETI(i)];
 
 #ifdef SHRINKING
@@ -1627,14 +1682,16 @@ static void solve_l2r_l1l2_svc_rf_fix(
 #endif
 			{
 				double alpha_old = alpha[i];
+				// update alpha[i] here! (there is no update conflict here)
 				alpha[i] = min(max(alpha[i] - G/QD[i], 0.0), C);
-
+				// We also want to update w!
 				double d = (alpha[i] - alpha_old)*yi;
 				if(d != 0) {
 					xi = prob->x[i];
 					while (xi->index != -1)
 					{
 						int ind = xi->index-1;
+						// w_new = w_old + delta_alpha * y_i * \bm{x_i}
 						double val = d*xi->value;
 //#pragma omp atomic
 						w[ind] += val;
@@ -1698,6 +1755,35 @@ static void solve_l2r_l1l2_svc_rf_fix(
 				PGmin_old = -INF;
 		}
 #endif
+		
+		// Now find delta_w and delta_alpha
+		double delta_w2 = 0.0;
+		double dot_w_delta_w = 0.0;
+		for (int ggg = 0; ggg < w_size; ggg++) {
+			double wi_old = w_old[ggg];
+			double wi = w[ggg];
+			double delta_wi = wi - wi_old;
+			delta_w[ggg] = delta_wi;
+			dot_w_delta_w += wi_old * delta_wi;
+			delta_w2 += delta_wi * delta_wi;
+		}
+		double sum_delta_alpha = 0.0;
+		for (int ggg = 0; ggg < l; ggg++) {
+			double delta_alphai = alpha[ggg] - alpha_old[ggg];
+			sum_delta_alpha += delta_alphai;
+			delta_alpha[ggg] = delta_alphai;
+		}
+		double eta = (sum_delta_alpha - dot_w_delta_w) / delta_w2;
+		double bounded_eta = min(1.0, max(0.0, eta));
+		for (int ggg = 0; ggg < l; ggg++) {
+			alpha[ggg] = alpha_old[ggg] + bounded_eta * delta_alpha[ggg];
+		}
+		// We also want to update w, because it is used in calculations later
+		for (int ggg = 0; ggg < w_size; ggg++) {
+			w[ggg] = w_old[ggg] + bounded_eta * delta_w[ggg];
+		}
+
+		// the compuation part of this iteration done. Now output some information
 		double itertime = omp_get_wtime() - starttime;
 		totaltime += itertime;
 		//tesing after each step
@@ -1734,9 +1820,9 @@ static void solve_l2r_l1l2_svc_rf_fix(
 			true_primal_obj = fun_obj->fun(&(tmpw[0]));
 			true_acc = fun_obj->testing(&(tmpw[0]))*100;
 		}
-
-		printf("iter %d walltime %lf itertime %lf f %.3lf d %.3lf acc %.1lf true-f %.3lf true-d %.3lf true-acc %.1lf err %.3g inittime %lf active_size %ld\n", 
-				iter, totaltime, itertime, primal_obj, dual_obj, acc, true_primal_obj, true_dual_obj, true_acc, err, inittime, active_set.size());		
+		double change = 0.5 * bounded_eta * bounded_eta * delta_w2 + bounded_eta * (dot_w_delta_w - sum_delta_alpha);
+		printf("iter %d walltime %lf itertime %lf f %.3lf d %.3lf acc %.1lf true-f %.3lf true-d %.3lf true-acc %.1lf err %.3g inittime %lf active_size %ld eta %lf true-eta %lf delta_w^2 %lf sum_d_alpha %lf dot_w_d_w %lf change %lf\n", 
+				iter, totaltime, itertime, primal_obj, dual_obj, acc, true_primal_obj, true_dual_obj, true_acc, err, inittime, active_set.size(), eta, bounded_eta, delta_w2, sum_delta_alpha, dot_w_delta_w, change);
 
 		fflush(stdout);
 	}
