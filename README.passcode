@@ -1,0 +1,54 @@
+	- This is the experimental code for the PASSCoDe paper. 
+		C.-J. Hsieh, H.-F. Yu, and I. S. Dhillon
+		PASSCoDe: Parallel ASynchronous Stochastic dual Co-ordinate Descent
+	- The current version only supports binary classification (with label +1 and -1).
+	- The current version only implemented limited dual solvers in the LIBLINEAR
+
+Environment Requirements
+========================
+	- GNU Compiler Collection (GCC) 4.7.1 or newer versions 
+		with - C++11 support
+			 - OpenMP support
+	- Unix Systems (If you are in Mac OS, please install GCC instead of the LLVM compiler shipped with the Xcode command line tools.
+
+Testing Script
+==============
+	> ./test-passcode.py
+
+Data Preparation 
+================
+
+Download the datasets from LIBSVM datasets
+	http://www.csie.ntu.edu.tw/~cjlin/libsvmtools/datasets/binary.html
+and convert it to the binary format used for the PASSCoDe. 
+
+Usage: convert2binary training_set_file [training_binary]
+
+
+Usage
+=====
+
+Usage: ./train[-shrink] [options] training_set_file test_set_file
+	options:
+	-s type : set type of solver (default 1)
+			31 -- L2-regularized L2-loss support vector classification PASSCoDe (dual)
+			33 -- L2-regularized L1-loss support vector classification PASSCoDe (dual)
+			41 -- L2-regularized L2-loss support vector classification LOCK (dual)
+			43 -- L2-regularized L1-loss support vector classification LOCK (dual)
+			51 -- L2-regularized L2-loss support vector classification ATOMIC (dual)
+			53 -- L2-regularized L1-loss support vector classification ATOMIC (dual)
+			61 -- L2-regularized L2-loss support vector classification CoCoA (dual)
+			63 -- L2-regularized L1-loss support vector classification CoCoA (dual)
+			71 -- L2-regularized L2-loss support vector classification ASCD (dual)
+			73 -- L2-regularized L1-loss support vector classification ASCD (dual)
+	-c cost : set the parameter C (default 1)
+	-n nr_threads : the number of threads
+	-t max_iterations: the max number of iterations (default 100)
+
+
+Additional Information
+======================
+
+For any questions and comments, please send your email to
+rofuyu@cs.utexas.edu
+

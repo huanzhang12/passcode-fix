@@ -1,0 +1,25 @@
+# object files
+*.d
+*.o
+*.pyc
+
+# emacs temp files
+*~
+
+# vi temp files
+*.swp
+
+# test output
+*.log
+
+# compiled libraries
+obj
+bin
+convert2binary
+train
+train-shrinking
+
+# datasets
+data
+
+
