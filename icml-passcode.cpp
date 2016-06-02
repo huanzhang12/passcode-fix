@@ -1030,8 +1030,11 @@ static void solve_l2r_l1l2_svc_atomic_fix(
 		double eta = (sum_delta_alpha - dot_w_delta_w - dot_alpha_delta_alpha) / (delta_w2 + delta_alpha2);
 		// Check whether eta == NAN....
 		if ( eta != eta ) {
-			printf("stepsize: %lf\n", stepsize);
 			stepsize /= 2;
+			printf("eta is NaN! New stepsize: %lf\n", stepsize);
+			// When eta is NaN, step size is too large so that alpha and w are damaged. Restoring alpha and w.
+			memcpy(alpha, alpha_old, l * sizeof(double));
+			memcpy(w, w_old, w_size * sizeof(double));
 			continue;
 		}
 		double bounded_eta = min(1.0, max(0.0, eta));
