@@ -1,7 +1,7 @@
 CXX=g++
 CC=gcc
-CFLAGS = -Wall -Wconversion -O3 -fPIC -std=c++11 -fopenmp 
-CFLAGS = -Wall -Wconversion -O2 -march=native -fPIC -std=c++11 -fopenmp 
+CFLAGS = -Wall -Wconversion -Wno-sign-compare -Wno-unused-function -O3 -fPIC -std=c++11 -fopenmp 
+CFLAGS = -Wall -Wconversion -Wno-sign-compare -Wno-unused-function -O2 -march=native -fPIC -std=c++11 -fopenmp 
 #CFLAGS = -Wall -Wconversion -O2 -march=native -fPIC -openmp 
 LIBS = blas/blas.a zlib/libz.a 
 SHVER = 1

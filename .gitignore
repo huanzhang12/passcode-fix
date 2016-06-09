@@ -13,6 +13,7 @@
 *.log
 
 # compiled libraries
+*.a
 obj
 bin
 convert2binary
