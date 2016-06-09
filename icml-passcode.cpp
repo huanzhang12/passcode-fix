@@ -1505,6 +1505,7 @@ static void solve_l2r_l1l2_svc_rf_fix(
 	double *alpha = new double[l];
 	double *tg = new double[w_size];
 	schar *y = new schar[l];
+	double stepsize = 1.0;
 
 	//int active_size = l;
 	printf("This is the fixed wild!\n");
@@ -1714,7 +1715,7 @@ static void solve_l2r_l1l2_svc_rf_fix(
 			{
 				double alpha_old = alpha[i];
 				// update alpha[i] here! (there is no update conflict here)
-				alpha[i] = min(max(alpha[i] - G/QD[i], 0.0), C);
+				alpha[i] = min(max(alpha[i] - stepsize*G/QD[i], 0.0), C);
 				// We also want to update w!
 				double d = (alpha[i] - alpha_old)*yi;
 				if(d != 0) {
@@ -1786,34 +1787,64 @@ static void solve_l2r_l1l2_svc_rf_fix(
 				PGmin_old = -INF;
 		}
 #endif
-		
-		// Now find delta_w and delta_alpha
+
 		double delta_w2 = 0.0;
 		double dot_w_delta_w = 0.0;
-		for (int ggg = 0; ggg < w_size; ggg++) {
-			double wi_old = w_old[ggg];
-			double wi = w[ggg];
-			double delta_wi = wi - wi_old;
-			delta_w[ggg] = delta_wi;
-			dot_w_delta_w += wi_old * delta_wi;
-			delta_w2 += delta_wi * delta_wi;
-		}
 		double sum_delta_alpha = 0.0;
-		for (int ggg = 0; ggg < l; ggg++) {
-			double delta_alphai = alpha[ggg] - alpha_old[ggg];
-			sum_delta_alpha += delta_alphai;
-			delta_alpha[ggg] = delta_alphai;
-		}
-		double eta = (sum_delta_alpha - dot_w_delta_w) / delta_w2;
-		double bounded_eta = min(1.0, max(0.0, eta));
-		for (int ggg = 0; ggg < l; ggg++) {
-			alpha[ggg] = alpha_old[ggg] + bounded_eta * delta_alpha[ggg];
-		}
-		// We also want to update w, because it is used in calculations later
-		for (int ggg = 0; ggg < w_size; ggg++) {
-			w[ggg] = w_old[ggg] + bounded_eta * delta_w[ggg];
-		}
+		double dot_alpha_delta_alpha = 0.0;
+		double delta_alpha2 = 0.0;
+#pragma omp parallel
+		{	
+			// Now find delta_w and delta_alpha
+#pragma omp for reduction(+:delta_w2, dot_w_delta_w) nowait
+			for (int ggg = 0; ggg < w_size; ggg++) {
+				double wi_old = w_old[ggg];
+				double wi = w[ggg];
+				double delta_wi = wi - wi_old;
+				delta_w[ggg] = delta_wi;
+				dot_w_delta_w += wi_old * delta_wi;
+				delta_w2 += delta_wi * delta_wi;
+			}
 
+#pragma omp for reduction(+:delta_alpha2, dot_alpha_delta_alpha, sum_delta_alpha) nowait
+			for (int ggg = 0; ggg < l; ggg++) {
+				double delta_alphai = alpha[ggg] - alpha_old[ggg];
+				delta_alpha[ggg] = delta_alphai;
+				sum_delta_alpha += delta_alphai;
+				dot_alpha_delta_alpha += delta_alphai*alpha_old[ggg]*diag[GETI(ggg)];
+				delta_alpha2 += delta_alphai*delta_alphai*diag[GETI(ggg)];
+			}
+		}
+	
+		double eta = (sum_delta_alpha - dot_w_delta_w - dot_alpha_delta_alpha) / (delta_w2 + delta_alpha2);
+		// Check whether eta == NAN....
+		if ( eta != eta ) {
+			stepsize /= 2;
+			printf("eta is NaN! New stepsize: %lf\n", stepsize);
+			// When eta is NaN, step size is too large so that alpha and w are damaged. Restoring alpha and w.
+			memcpy(alpha, alpha_old, l * sizeof(double));
+			memcpy(w, w_old, w_size * sizeof(double));
+			continue;
+		}
+		double bounded_eta = min(1.0, max(0.0, eta));
+
+		// seems converge faster when we decrease eta
+		if ( eta < 0.1 )
+			stepsize /=2;
+
+#pragma omp parallel
+		{
+#pragma omp for nowait
+			for (int ggg = 0; ggg < l; ggg++) {
+				alpha[ggg] = alpha_old[ggg] + bounded_eta * delta_alpha[ggg];
+			}
+
+			// We also want to update w, because it is used in calculations later
+#pragma omp for nowait
+			for (int ggg = 0; ggg < w_size; ggg++) {
+				w[ggg] = w_old[ggg] + bounded_eta * delta_w[ggg];
+			}
+		}
 		// the compuation part of this iteration done. Now output some information
 		double itertime = omp_get_wtime() - starttime;
 		totaltime += itertime;
@@ -1851,10 +1882,9 @@ static void solve_l2r_l1l2_svc_rf_fix(
 			true_primal_obj = fun_obj->fun(&(tmpw[0]));
 			true_acc = fun_obj->testing(&(tmpw[0]))*100;
 		}
-		double change = 0.5 * bounded_eta * bounded_eta * delta_w2 + bounded_eta * (dot_w_delta_w - sum_delta_alpha);
-		printf("iter %d walltime %lf itertime %lf f %.3lf d %.3lf acc %.1lf true-f %.3lf true-d %.3lf true-acc %.1lf err %.3g inittime %lf active_size %ld eta %lf true-eta %lf delta_w^2 %lf sum_d_alpha %lf dot_w_d_w %lf change %lf\n", 
-				iter, totaltime, itertime, primal_obj, dual_obj, acc, true_primal_obj, true_dual_obj, true_acc, err, inittime, active_set.size(), eta, bounded_eta, delta_w2, sum_delta_alpha, dot_w_delta_w, change);
-
+		double change = 0.5 * bounded_eta * bounded_eta * (delta_w2 + delta_alpha2) + bounded_eta * (dot_w_delta_w - sum_delta_alpha + dot_alpha_delta_alpha);
+		printf("iter %d walltime %lf itertime %lf f %.3lf d %.3lf acc %.1lf true-f %.3lf true-d %.3lf true-acc %.1lf err %.3g inittime %lf active_size %ld eta %lf true-eta %lf delta_w^2 %lf sum_d_alpha %lf dot_w_d_w %lf change %lf stepsize %lf\n", 
+				iter, totaltime, itertime, primal_obj, dual_obj, acc, true_primal_obj, true_dual_obj, true_acc, err, inittime, active_set.size(), eta, bounded_eta, delta_w2, sum_delta_alpha, dot_w_delta_w, change, stepsize);		
 		fflush(stdout);
 	}
 
