@@ -330,7 +330,7 @@ static void solve_l2r_l1l2_svc_lock(
 			true_acc = fun_obj->testing(&(tmpw[0]))*100;
 		}
 
-		printf("iter %d walltime %lf itertime %lf f %.3lf d %.3lf acc %.1lf true-f %.3lf true-d %.3lf true-acc %.1lf err %.3g inittime %lf active_size %ld\n", 
+		printf("iter %d walltime %lf itertime %lf f %.3lf d %.3lf acc %.3lf true-f %.3lf true-d %.3lf true-acc %.3lf err %.3g inittime %lf active_size %ld\n", 
 				iter, totaltime, itertime, primal_obj, dual_obj, acc, true_primal_obj, true_dual_obj, true_acc, err, inittime, active_set.size());		
 		fflush(stdout);
 	}
@@ -681,7 +681,7 @@ static void solve_l2r_l1l2_svc_atomic(
 			true_acc = fun_obj->testing(&(tmpw[0]))*100;
 		}
 
-		printf("iter %d walltime %lf itertime %lf f %.3lf d %.3lf acc %.1lf true-f %.3lf true-d %.3lf true-acc %.1lf err %.3g inittime %lf active_size %ld\n", 
+		printf("iter %d walltime %lf itertime %lf f %.3lf d %.3lf acc %.3lf true-f %.3lf true-d %.3lf true-acc %.3lf err %.3g inittime %lf active_size %ld\n", 
 				iter, totaltime, itertime, primal_obj, dual_obj, acc, true_primal_obj, true_dual_obj, true_acc, err, inittime, active_set.size());		
 
 		fflush(stdout);
@@ -1099,7 +1099,7 @@ static void solve_l2r_l1l2_svc_atomic_fix(
 		}
 
 		double change = 0.5 * bounded_eta * bounded_eta * (delta_w2 + delta_alpha2) + bounded_eta * (dot_w_delta_w - sum_delta_alpha + dot_alpha_delta_alpha);
-		printf("iter %d walltime %lf itertime %lf f %.3lf d %.3lf acc %.1lf true-f %.3lf true-d %.3lf true-acc %.1lf err %.3g inittime %lf active_size %ld eta %lf true-eta %lf delta_w^2 %lf sum_d_alpha %lf dot_w_d_w %lf change %lf stepsize %lf\n", 
+		printf("iter %d walltime %lf itertime %lf f %.3lf d %.3lf acc %.3lf true-f %.3lf true-d %.3lf true-acc %.3lf err %.3g inittime %lf active_size %ld eta %lf true-eta %lf delta_w^2 %lf sum_d_alpha %lf dot_w_d_w %lf change %lf stepsize %lf\n", 
 				iter, totaltime, itertime, primal_obj, dual_obj, acc, true_primal_obj, true_dual_obj, true_acc, err, inittime, active_set.size(), eta, bounded_eta, delta_w2, sum_delta_alpha, dot_w_delta_w, change, stepsize);		
 
 		fflush(stdout);
@@ -1451,7 +1451,7 @@ static void solve_l2r_l1l2_svc_rf(
 			true_acc = fun_obj->testing(&(tmpw[0]))*100;
 		}
 
-		printf("iter %d walltime %lf itertime %lf f %.3lf d %.3lf acc %.1lf true-f %.3lf true-d %.3lf true-acc %.1lf err %.3g inittime %lf active_size %ld\n", 
+		printf("iter %d walltime %lf itertime %lf f %.3lf d %.3lf acc %.3lf true-f %.3lf true-d %.3lf true-acc %.3lf err %.3g inittime %lf active_size %ld\n", 
 				iter, totaltime, itertime, primal_obj, dual_obj, acc, true_primal_obj, true_dual_obj, true_acc, err, inittime, active_set.size());		
 
 		fflush(stdout);
@@ -1883,7 +1883,7 @@ static void solve_l2r_l1l2_svc_rf_fix(
 			true_acc = fun_obj->testing(&(tmpw[0]))*100;
 		}
 		double change = 0.5 * bounded_eta * bounded_eta * (delta_w2 + delta_alpha2) + bounded_eta * (dot_w_delta_w - sum_delta_alpha + dot_alpha_delta_alpha);
-		printf("iter %d walltime %lf itertime %lf f %.3lf d %.3lf acc %.1lf true-f %.3lf true-d %.3lf true-acc %.1lf err %.3g inittime %lf active_size %ld eta %lf true-eta %lf delta_w^2 %lf sum_d_alpha %lf dot_w_d_w %lf change %lf stepsize %lf\n", 
+		printf("iter %d walltime %lf itertime %lf f %.3lf d %.3lf acc %.3lf true-f %.3lf true-d %.3lf true-acc %.3lf err %.3g inittime %lf active_size %ld eta %lf true-eta %lf delta_w^2 %lf sum_d_alpha %lf dot_w_d_w %lf change %lf stepsize %lf\n", 
 				iter, totaltime, itertime, primal_obj, dual_obj, acc, true_primal_obj, true_dual_obj, true_acc, err, inittime, active_set.size(), eta, bounded_eta, delta_w2, sum_delta_alpha, dot_w_delta_w, change, stepsize);		
 		fflush(stdout);
 	}
@@ -2124,7 +2124,7 @@ static void solve_l2r_l1l2_svc_cocoa(
 			true_acc = fun_obj->testing(&(tmpw[0]))*100;
 		}
 
-		printf("iter %d walltime %lf f %.3lf d %.3lf acc %.1lf true-f %.3lf true-d %.3lf true-acc %.1lf err %.3g inittime %lf active_size %ld\n", 
+		printf("iter %d walltime %lf f %.3lf d %.3lf acc %.3lf true-f %.3lf true-d %.3lf true-acc %.3lf err %.3g inittime %lf active_size %ld\n", 
 				iter, totaltime, primal_obj, dual_obj, acc, true_primal_obj, true_dual_obj, true_acc, err, inittime, active_set.size());		
 
 		fflush(stdout);
@@ -2329,7 +2329,7 @@ static void solve_l2r_l1l2_svc_ascd(
 			true_acc = acc;
 		}
 
-		printf("iter %d walltime %lf f %.3lf d %.3lf acc %.1lf true-f %.3lf true-d %.3lf true-acc %.1lf err %.3g inittime %lf active_size %ld\n", 
+		printf("iter %d walltime %lf f %.3lf d %.3lf acc %.3lf true-f %.3lf true-d %.3lf true-acc %.3lf err %.3g inittime %lf active_size %ld\n", 
 				iter, totaltime, primal_obj, dual_obj, acc, true_primal_obj, true_dual_obj, true_acc, err, inittime, active_set.size());		
 
 		fflush(stdout);
