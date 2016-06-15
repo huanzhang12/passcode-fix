@@ -1046,18 +1046,27 @@ static void solve_l2r_l1l2_svc_atomic_fix(
 		// seems converge faster when we decrease eta
 		if ( eta < 0.1 )
 			stepsize /=2;
-
+		// eta close to 0, just copy...
+		if ( eta < 0.01) {
+			// printf("copy...\n");
+			memcpy(alpha, alpha_old, l * sizeof(double));
+			memcpy(w, w_old, w_size * sizeof(double));
+		}
+		// if eta is close to 1.0, no need to update alpha and w
+		else if ( eta < 0.99) {
+			// printf("update...\n");
 #pragma omp parallel
-		{
+			{
 #pragma omp for nowait
-			for (int ggg = 0; ggg < l; ggg++) {
-				alpha[ggg] = alpha_old[ggg] + bounded_eta * delta_alpha[ggg];
-			}
+				for (int ggg = 0; ggg < l; ggg++) {
+					alpha[ggg] = alpha_old[ggg] + bounded_eta * delta_alpha[ggg];
+				}
 
-			// We also want to update w, because it is used in calculations later
+				// We also want to update w, because it is used in calculations later
 #pragma omp for nowait
-			for (int ggg = 0; ggg < w_size; ggg++) {
-				w[ggg] = w_old[ggg] + bounded_eta * delta_w[ggg];
+				for (int ggg = 0; ggg < w_size; ggg++) {
+					w[ggg] = w_old[ggg] + bounded_eta * delta_w[ggg];
+				}
 			}
 		}
 
@@ -1831,18 +1840,27 @@ static void solve_l2r_l1l2_svc_rf_fix(
 		// seems converge faster when we decrease eta
 		if ( eta < 0.1 )
 			stepsize /=2;
-
+		// eta close to 0, just copy...
+		if ( eta < 0.01) {
+			// printf("copy...\n");
+			memcpy(alpha, alpha_old, l * sizeof(double));
+			memcpy(w, w_old, w_size * sizeof(double));
+		}
+		// if eta is close to 1.0, no need to update alpha and w
+		else if ( eta < 0.99) {
+			// printf("update...\n");
 #pragma omp parallel
-		{
+			{
 #pragma omp for nowait
-			for (int ggg = 0; ggg < l; ggg++) {
-				alpha[ggg] = alpha_old[ggg] + bounded_eta * delta_alpha[ggg];
-			}
+				for (int ggg = 0; ggg < l; ggg++) {
+					alpha[ggg] = alpha_old[ggg] + bounded_eta * delta_alpha[ggg];
+				}
 
-			// We also want to update w, because it is used in calculations later
+				// We also want to update w, because it is used in calculations later
 #pragma omp for nowait
-			for (int ggg = 0; ggg < w_size; ggg++) {
-				w[ggg] = w_old[ggg] + bounded_eta * delta_w[ggg];
+				for (int ggg = 0; ggg < w_size; ggg++) {
+					w[ggg] = w_old[ggg] + bounded_eta * delta_w[ggg];
+				}
 			}
 		}
 		// the compuation part of this iteration done. Now output some information
