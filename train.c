@@ -56,9 +56,10 @@ void exit_with_help()
 	"-n nr_threads : the number of threads\n"
 	//"-S 1 : enable shrinking or not (default 1)\n"
 	"-t max_iterations: the max number of iterations (default 100)\n"
-	/*
-	"-p epsilon : set the epsilon in loss function of SVR (default 0.1)\n"
+	
+	/*"-p epsilon : set the epsilon in loss function of SVR (default 0.1)\n"*/
 	"-e epsilon : set tolerance of termination criterion\n"
+	/*
 	"	-s 0 and 2\n"
 	"		|f'(w)|_2 <= eps*min(pos,neg)/l*|f'(w0)|_2,\n"
 	"		where f is the primal function and pos/neg are # of\n"

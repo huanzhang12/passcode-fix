@@ -1022,13 +1022,21 @@ static void solve_l2r_l1l2_svc_atomic_fix(
 			}
 
 #pragma omp for reduction(+:delta_alpha2, dot_alpha_delta_alpha, sum_delta_alpha) nowait
-			for (int ggg = 0; ggg < l; ggg++) {
+			for (int s = 0; s < active_size; s++) {
+				int ggg = active_set[s];
 				double delta_alphai = alpha[ggg] - alpha_old[ggg];
 				delta_alpha[ggg] = delta_alphai;
 				sum_delta_alpha += delta_alphai;
 				dot_alpha_delta_alpha += delta_alphai*alpha_old[ggg]*diag[GETI(ggg)];
 				delta_alpha2 += delta_alphai*delta_alphai*diag[GETI(ggg)];
 			}
+			/*			for (int ggg = 0; ggg < l; ggg++) {
+				double delta_alphai = alpha[ggg] - alpha_old[ggg];
+				delta_alpha[ggg] = delta_alphai;
+				sum_delta_alpha += delta_alphai;
+				dot_alpha_delta_alpha += delta_alphai*alpha_old[ggg]*diag[GETI(ggg)];
+				delta_alpha2 += delta_alphai*delta_alphai*diag[GETI(ggg)];
+			}*/
 		}
 	
 		double eta = (sum_delta_alpha - dot_w_delta_w - dot_alpha_delta_alpha) / (delta_w2 + delta_alpha2);
@@ -1058,9 +1066,13 @@ static void solve_l2r_l1l2_svc_atomic_fix(
 #pragma omp parallel
 			{
 #pragma omp for nowait
-				for (int ggg = 0; ggg < l; ggg++) {
+				for (int s = 0; s < active_size; s++) {
+					int ggg = active_set[s];
 					alpha[ggg] = alpha_old[ggg] + bounded_eta * delta_alpha[ggg];
 				}
+/*				for (int ggg = 0; ggg < l; ggg++) {
+					alpha[ggg] = alpha_old[ggg] + bounded_eta * delta_alpha[ggg];
+				}*/
 
 				// We also want to update w, because it is used in calculations later
 #pragma omp for nowait
