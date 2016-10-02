@@ -1,34 +1,25 @@
 <!DOCTYPE html>
-<html>
+<html lang="en-us">
   <head>
-    <meta charset='utf-8'>
-    <meta http-equiv="X-UA-Compatible" content="chrome=1">
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-    <link href='https://fonts.googleapis.com/css?family=Architects+Daughter' rel='stylesheet' type='text/css'>
+    <meta charset="UTF-8">
+    <title>PASSCoDe-fix by huanzhang12</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="stylesheets/normalize.css" media="screen">
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
     <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
     <link rel="stylesheet" type="text/css" href="stylesheets/github-light.css" media="screen">
-    <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print">
-
-    <!--[if lt IE 9]>
-    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
-    <![endif]-->
-
-    <title>PASSCoDe-fix by huanzhang12</title>
   </head>
-
   <body>
-    <header>
-      <div class="inner">
-        <h1>PASSCoDe-fix</h1>
-        <h2>Fixing convergence problems in Parallel ASynchronous Stochastic dual Co-ordinate Descent (PASSCoDe) </h2>
-        <a href="https://github.com/huanzhang12/passcode-fix" class="button"><small>View project on</small> GitHub</a>
-      </div>
-    </header>
+    <section class="page-header">
+      <h1 class="project-name">PASSCoDe-fix</h1>
+      <h2 class="project-tagline">Fixing convergence problems in Parallel ASynchronous Stochastic dual Co-ordinate Descent (PASSCoDe) </h2>
+      <a href="https://github.com/huanzhang12/passcode-fix" class="btn">View on GitHub</a>
+      <a href="https://github.com/huanzhang12/passcode-fix/zipball/master" class="btn">Download .zip</a>
+      <a href="https://github.com/huanzhang12/passcode-fix/tarball/master" class="btn">Download .tar.gz</a>
+    </section>
 
-    <div id="content-wrapper">
-      <div class="inner clearfix">
-        <section id="main-content">
-          <h1>
+    <section class="main-content">
+      <h1>
 <a id="passcode-fix" class="anchor" href="#passcode-fix" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>PASSCoDe-fix</h1>
 
 <p>PASSCoDe-fix is based on the PASSCoDe (Parallel ASynchronous Stochastic dual Co-ordinate Descent)
@@ -55,14 +46,15 @@ C.-J. Hsieh, H.-F. Yu, and I. S. Dhillon
 </ul>
 
 <p>To build the program, simply run <code>make</code>. Two binaries, <code>train</code> (for training without shrinking)
-and <code>train-shrink</code> (for training with shrinking) will be built. In general training with shrinking is faster and preferred.</p>
+and <code>train-shrink</code> (for training with shrinking) will be built. 
+In the PASSCoDe-fix paper, we did not use shrinking in our experiments and analysis.</p>
 
 <h2>
 <a id="data-preparation-" class="anchor" href="#data-preparation-" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Data Preparation </h2>
 
 <p>Please download the datasets from LIBSVM datasets
 <a href="http://www.csie.ntu.edu.tw/%7Ecjlin/libsvmtools/datasets/binary.html">http://www.csie.ntu.edu.tw/~cjlin/libsvmtools/datasets/binary.html</a>
-and convert it to the binary format used for PASSCoDe-fix. </p>
+and convert them to the binary format used for PASSCoDe-fix. </p>
 
 <pre><code>./convert2binary training_set_file [training_binary]
 </code></pre>
@@ -70,7 +62,7 @@ and convert it to the binary format used for PASSCoDe-fix. </p>
 <h2>
 <a id="usage" class="anchor" href="#usage" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Usage</h2>
 
-<p>The new solvers added in this version is PASSCoDe-Atomic-fix and PASSCoDe-Wild-fix for L1-loss
+<p>The new solvers added in this version are PASSCoDe-Atomic-fix and PASSCoDe-Wild-fix for L1-loss
 and L2-loss support vector classifications.
 They can be invoked by set the type of solver to 55, 57, 35 and 37, respectively.
 Please note that in our paper only ATOMIC-fix based algorithms are analyzed,
@@ -105,24 +97,14 @@ options:
 
 <p>If your have any questions or comments, please open an issue on Github,
 or send an email to <a href="mailto:ecezhang@ucdavis.edu">ecezhang@ucdavis.edu</a>. We appreciate your feedback.</p>
-        </section>
 
-        <aside id="sidebar">
-          <a href="https://github.com/huanzhang12/passcode-fix/zipball/master" class="button">
-            <small>Download</small>
-            .zip file
-          </a>
-          <a href="https://github.com/huanzhang12/passcode-fix/tarball/master" class="button">
-            <small>Download</small>
-            .tar.gz file
-          </a>
+      <footer class="site-footer">
+        <span class="site-footer-owner"><a href="https://github.com/huanzhang12/passcode-fix">PASSCoDe-fix</a> is maintained by <a href="https://github.com/huanzhang12">huanzhang12</a>.</span>
 
-          <p class="repo-owner"><a href="https://github.com/huanzhang12/passcode-fix"></a> is maintained by <a href="https://github.com/huanzhang12">huanzhang12</a>.</p>
+        <span class="site-footer-credits">This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the <a href="https://github.com/jasonlong/cayman-theme">Cayman theme</a> by <a href="https://twitter.com/jasonlong">Jason Long</a>.</span>
+      </footer>
 
-          <p>This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the Architect theme by <a href="https://twitter.com/jasonlong">Jason Long</a>.</p>
-        </aside>
-      </div>
-    </div>
+    </section>
 
   
   </body>
