@@ -1,10 +1,12 @@
 PASSCoDe-fix
 ========================
-PASSCoDe-fix is based on the PASSCoDe (Parallel ASynchronous Stochastic dual Co-ordinate Descent)
-algorithm, and aim to fix the divergence problem of PASSCoDe in highly parallel situations.
-Please note that the current version only supports binary classification (with label +1 and -1),
-and only implemented limited dual solvers in the LIBLINEAR (see Usage below).
-For more details about this algorithm please refer to the following papers:
+
+PASSCoDe-fix is based on the PASSCoDe (Parallel ASynchronous Stochastic dual
+Co-ordinate Descent) algorithm, and we aim to fix the divergence problem of
+PASSCoDe in highly parallel situations.  Please note that the current version
+only supports binary classification (with label +1 and -1), and only
+implemented limited dual solvers in the LIBLINEAR (see Usage below). For more
+details about this algorithm please refer to the following papers:
 
 ```
 Fixing the Convergence Problems in Parallel Asynchronous Dual Coordinate Descent,
@@ -19,12 +21,15 @@ Build
 
 We require the following environment to build PASSCoDe-fix:
 
-- GNU Compiler Collection (GCC) 4.7.1 or newer versions, with C++11 and OpenMP support
-- Unix Systems (If you are in Mac OS, please install GCC instead of the LLVM compiler shipped with the Xcode command line tools.
+- GNU Compiler Collection (GCC) 4.7.1 or newer versions, with C++11 and OpenMP
+  support
+- Unix Systems (If you are in Mac OS, please install GCC instead of the LLVM
+  compiler shipped with the Xcode command line tools.
 
-To build the program, simply run `make`. Two binaries, `train` (for training without shrinking)
-and `train-shrink` (for training with shrinking) will be built. 
-In the PASSCoDe-fix paper, we did not use shrinking in our experiments and analysis.
+To build the program, simply run `make`. Two binaries, `train` (for training
+without shrinking) and `train-shrink` (for training with shrinking) will be
+built.  In the PASSCoDe-fix paper, we did not use shrinking in our experiments
+and analysis.
 
 Data Preparation 
 ----------------
@@ -41,9 +46,9 @@ and convert them to the binary format used for PASSCoDe-fix.
 Usage
 ----------------
 
-The new solvers added in this version are PASSCoDe-Atomic-fix and PASSCoDe-Wild-fix for L1-loss
-and L2-loss support vector classifications.
-They can be invoked by set the type of solver to 55, 57, 35 and 37, respectively.
+The new solvers added in this version are PASSCoDe-Atomic-fix and
+PASSCoDe-Wild-fix for L1-loss and L2-loss support vector classifications.  They
+can be invoked by set the type of solver to 55, 57, 35 and 37, respectively.
 Please note that in our paper only ATOMIC-fix based algorithms are analyzed,
 however Wild-fix might give you best performance for certain datasets.
 
