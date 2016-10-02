@@ -23,14 +23,15 @@ We require the following environment to build PASSCoDe-fix:
 - Unix Systems (If you are in Mac OS, please install GCC instead of the LLVM compiler shipped with the Xcode command line tools.
 
 To build the program, simply run `make`. Two binaries, `train` (for training without shrinking)
-and `train-shrink` (for training with shrinking) will be built. In general training with shrinking is faster and preferred.
+and `train-shrink` (for training with shrinking) will be built. 
+In the PASSCoDe-fix paper, we did not use shrinking in our experiments and analysis.
 
 Data Preparation 
 ----------------
 
 Please download the datasets from LIBSVM datasets
 http://www.csie.ntu.edu.tw/~cjlin/libsvmtools/datasets/binary.html
-and convert it to the binary format used for PASSCoDe-fix. 
+and convert them to the binary format used for PASSCoDe-fix. 
 
 ```
 ./convert2binary training_set_file [training_binary]
@@ -40,7 +41,7 @@ and convert it to the binary format used for PASSCoDe-fix.
 Usage
 ----------------
 
-The new solvers added in this version is PASSCoDe-Atomic-fix and PASSCoDe-Wild-fix for L1-loss
+The new solvers added in this version are PASSCoDe-Atomic-fix and PASSCoDe-Wild-fix for L1-loss
 and L2-loss support vector classifications.
 They can be invoked by set the type of solver to 55, 57, 35 and 37, respectively.
 Please note that in our paper only ATOMIC-fix based algorithms are analyzed,
