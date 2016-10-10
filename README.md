@@ -10,10 +10,10 @@ details about this algorithm please refer to the following papers:
 
 ```
 Fixing the Convergence Problems in Parallel Asynchronous Dual Coordinate Descent,
-Huan Zhang and Cho-Jui Hsieh
+Huan Zhang and Cho-Jui Hsieh, 2016. 
 
 PASSCoDe: Parallel ASynchronous Stochastic dual Co-ordinate Descent, 
-C.-J. Hsieh, H.-F. Yu, and I. S. Dhillon
+C.-J. Hsieh, H.-F. Yu, and I. S. Dhillon, 2015. 
 ```
 
 Build
