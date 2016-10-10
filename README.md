@@ -24,7 +24,7 @@ We require the following environment to build PASSCoDe-fix:
 - GNU Compiler Collection (GCC) 4.7.1 or newer versions, with C++11 and OpenMP
   support
 - Unix Systems (If you are in Mac OS, please install GCC instead of the LLVM
-  compiler shipped with the Xcode command line tools.
+  compiler shipped with the Xcode command line tools.)
 
 To build the program, simply run `make`. Two binaries, `train` (for training
 without shrinking) and `train-shrink` (for training with shrinking) will be
@@ -41,6 +41,10 @@ and convert them to the binary format used for PASSCoDe-fix.
 ```
 ./convert2binary training_set_file [training_binary]
 ```
+
+You can also use LIBSVM format directly by adding the argument "-b 0".
+However data loading will be slower.
+
 We have prepared binary files used in the experiments of our paper.
 You can download these datasets here:
 
