@@ -41,7 +41,13 @@ and convert them to the binary format used for PASSCoDe-fix.
 ```
 ./convert2binary training_set_file [training_binary]
 ```
+We have prepared binary files used in the experiments of our paper.
+You can download these datasets here:
 
+[http://jaina.cs.ucdavis.edu/datasets/classification_compressed/](http://jaina.cs.ucdavis.edu/datasets/classification_compressed/)
+
+You only need to download .cbin.xz files. To save downloading time these files
+are compressed. Please decompress them using the `xz` utility before use.
 
 Usage
 ----------------
